@@ -1,0 +1,21 @@
+[Unit]
+Description=Tiara - Tiny IP Address Registry API Server
+After=network-online.target
+ 
+[Service]
+Type=simple
+
+WorkingDirectory=/opt/tiara 
+Environment=IPAM_USERNAME=ipam
+Environment=IPAM_PASSWORD={{ ipam_api_password  }}
+Environment=IPAM_DATABASE_URI=mysql+pymysql://ipam:{{ ipam_db_password }}@127.0.0.1/ipam
+ExecStartPre=/opt/tiara/bin/flask db upgrade
+ExecStart=/opt/tiara/bin/gunicorn --access-logfile - -b 0.0.0.0 wsgi 
+ 
+Restart=on-failure
+ 
+# Configures the time to wait before service is stopped forcefully.
+TimeoutStopSec=300
+ 
+[Install]
+WantedBy=multi-user.target

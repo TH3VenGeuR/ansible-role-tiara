@@ -1,0 +1,37 @@
+- name: ensure needed packages are present
+  package: 
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - git
+    - python3-pip
+    - python3-venv
+
+- name: create folder
+  file:
+    state: directory 
+    path: /opt/tiara/
+
+- name: get repositoy
+  git:
+    repo: https://github.com/TH3VenGeuR/tiara.git 
+    dest: /opt/tiara
+
+- name: Create a venv
+  shell: python3 -m venv /opt/tiara
+
+- name: Install specified python requirements
+  ansible.builtin.pip:
+    requirements: /opt/tiara/requirements.txt
+    virtualenv: /opt/tiara/
+
+- name: Copy service template 
+  template: 
+    src: tiara.service.j2  
+    dest: /etc/systemd/system/tiara.service 
+
+- name: Enable tiara 
+  ansible.builtin.systemd:
+    name: tiara.service
+    state: started
+    enabled: true
